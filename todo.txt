@@ -1,0 +1,4 @@
+// finish implementation (various signing algorithms)
+// write tests
+// publishing
+// abstract over circe / various modules (play-json ...)
