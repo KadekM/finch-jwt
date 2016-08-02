@@ -25,6 +25,8 @@ final case class JwtAuth(key: String, algorithm: JwtHmacAlgorithm, authHeader: S
           Unauthorized(JwtAuthFailed)
       }
 
+  // -- another way
+
   def apply[A](e: Endpoint[A]): Endpoint[A] = new Endpoint[A] {
     private[this] val unauthorized = new Rerunnable[Output[A]] {
       override def run = Future.value(Unauthorized(JwtAuthFailed))
