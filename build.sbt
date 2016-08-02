@@ -32,6 +32,38 @@ val baseSettings = Seq(
   libraryDependencies := Seq("com.github.finagle" %% "finch-core"  % finchVersion)
 )
 
+val publishSettings = Seq(
+  homepage := Some(url("https://github.com/KadekM/finch-jwt")),
+  publishMavenStyle := true,
+  publishArtifact in Test := false,
+  publishTo := {
+    val nexus = "https://oss.sonatype.org/"
+    if (isSnapshot.value)
+      Some("snapshots" at nexus + "content/repositories/snapshots")
+    else
+      Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+  },
+  pomIncludeRepository := { _ => false },
+  pomExtra := (
+    <licenses>
+      <license>
+        <name>MIT license</name>
+        <url>http://www.opensource.org/licenses/mit-license.php</url>
+      </license>
+    </licenses>
+    <scm>
+      <url>git@github.com:kadekm/finch-jwt.git</url>
+      <connection>scm:git:git@github.com:kadekm/finch-jwt.git</connection>
+    </scm>
+      <developers>
+        <developer>
+          <id>kadekm</id>
+          <name>Marek Kadek</name>
+          <url>https://github.com/KadekM</url>
+        </developer>
+      </developers>)
+)
+
 lazy val jwtScala = project.in(file("."))
   .settings(baseSettings)
   .settings(

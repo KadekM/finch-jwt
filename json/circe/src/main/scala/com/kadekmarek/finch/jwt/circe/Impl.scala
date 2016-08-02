@@ -1,4 +1,4 @@
-package com.marekkadek.finch.jwt.circe
+package com.kadekmarek.finch.jwt.circe
 
 import com.twitter.util.Future
 import io.catbird.util.Rerunnable
