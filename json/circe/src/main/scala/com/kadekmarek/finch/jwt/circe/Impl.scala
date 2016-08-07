@@ -5,8 +5,9 @@ import com.twitter.util.Future
 import io.catbird.util.Rerunnable
 import io.circe.{Decoder, Json}
 import io.finch.{Endpoint, Input, Output, _}
-import pdi.jwt.JwtCirce
+import pdi.jwt.{JwtCirce, JwtClaim}
 import pdi.jwt.algorithms.JwtHmacAlgorithm
+import io.circe.parser._
 
 import scala.util.{Failure, Success}
 
@@ -16,16 +17,18 @@ object JwtAuthFailed extends Exception {
 
 final case class JwtAuth(key: String, algorithm: JwtHmacAlgorithm, authHeader: String) {
 
-  def auth: Endpoint[Json] =
-    header(authHeader).map(x => JwtCirce.decodeJson(x, key, Seq(algorithm))).mapOutput {
+  // todo: does decode check token expiration?
+
+  def auth: Endpoint[JwtClaim] =
+    header(authHeader).map(x => JwtCirce.decode(x, key, Seq(algorithm))).mapOutput {
       case Success(x) =>
         Ok(x)
       case Failure(_) =>
         Unauthorized(JwtAuthFailed)
     }
 
-  def authAs[A: Decoder]: Endpoint[A] = auth.mapOutput { js =>
-    js.as[A] match {
+  def authAs[A: Decoder]: Endpoint[A] = auth.mapOutput { claim =>
+    decode[A](claim.content) match {
       case Xor.Right(x) => Ok(x)
       case Xor.Left(e)  => BadRequest(e)
     }
