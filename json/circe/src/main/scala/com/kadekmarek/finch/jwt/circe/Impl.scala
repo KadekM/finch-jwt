@@ -1,8 +1,9 @@
 package com.kadekmarek.finch.jwt.circe
 
+import cats.data.Xor
 import com.twitter.util.Future
 import io.catbird.util.Rerunnable
-import io.circe.Json
+import io.circe.{Decoder, Json}
 import io.finch.{Endpoint, Input, Output, _}
 import pdi.jwt.JwtCirce
 import pdi.jwt.algorithms.JwtHmacAlgorithm
@@ -16,16 +17,21 @@ object JwtAuthFailed extends Exception {
 final case class JwtAuth(key: String, algorithm: JwtHmacAlgorithm, authHeader: String) {
 
   def auth: Endpoint[Json] =
-    header(authHeader)
-      .map(x => JwtCirce.decodeJson(x, key, Seq(algorithm)))
-      .mapOutput {
-        case Success(x) =>
-          Ok(x)
-        case Failure(_) =>
-          Unauthorized(JwtAuthFailed)
-      }
+    header(authHeader).map(x => JwtCirce.decodeJson(x, key, Seq(algorithm))).mapOutput {
+      case Success(x) =>
+        Ok(x)
+      case Failure(_) =>
+        Unauthorized(JwtAuthFailed)
+    }
 
-  // -- another way
+  def authAs[A: Decoder]: Endpoint[A] = auth.mapOutput { js =>
+    js.as[A] match {
+      case Xor.Right(x) => Ok(x)
+      case Xor.Left(e)  => BadRequest(e)
+    }
+  }
+
+  // -- another way, deprecate?
 
   def apply[A](e: Endpoint[A]): Endpoint[A] = new Endpoint[A] {
     private[this] val unauthorized = new Rerunnable[Output[A]] {
@@ -40,10 +46,7 @@ final case class JwtAuth(key: String, algorithm: JwtHmacAlgorithm, authHeader: S
 
     private[this] def authenticated(input: Input): Rerunnable[Boolean] =
       Rerunnable.fromFuture(
-        input.request.headerMap
-          .get(authHeader)
-          .map(validate)
-          .getOrElse(Future.False))
+          input.request.headerMap.get(authHeader).map(validate).getOrElse(Future.False))
 
     private[this] def validate(headerContent: String): Future[Boolean] =
       JwtCirce.decodeJson(headerContent, key, Seq(algorithm)) match {
@@ -54,4 +57,3 @@ final case class JwtAuth(key: String, algorithm: JwtHmacAlgorithm, authHeader: S
       }
   }
 }
-
