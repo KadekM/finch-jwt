@@ -12,11 +12,7 @@ import io.circe.parser._
 import scala.util.{Failure, Success}
 
 object JwtAuthFailed extends Exception {
-  override def getMessage: String = "JWT failed to decode"
-}
-
-object JwtExpired extends Exception {
-  override def getMessage: String = "JWT is expired"
+  override def getMessage: String = "JWT is invalid"
 }
 
 // TODO: support multiple algorithms
@@ -25,8 +21,7 @@ final case class JwtAuth(key: String, algorithm: JwtHmacAlgorithm, authHeader: S
   def auth: Endpoint[JwtClaim] =
     header(authHeader).map(x => JwtCirce.decode(x, key, Seq(algorithm))).mapOutput {
       case Success(x) =>
-        if (x.isValid) Ok(x)
-        else Unauthorized(JwtExpired)
+        Ok(x)
 
       case Failure(_) =>
         Unauthorized(JwtAuthFailed)
