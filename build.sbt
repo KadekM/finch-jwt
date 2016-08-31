@@ -1,7 +1,7 @@
 scalafmtConfig in ThisBuild := Some(file(".scalafmt"))
 
 val jwtVersion   = "0.8.0"
-val finchVersion = "0.11.0-M2"
+val finchVersion = "0.11.0-M3"
 
 val baseSettings = Seq(
   scalaVersion := "2.11.8",
