@@ -13,7 +13,7 @@ object JwtAuthFailed extends Exception {
   override def getMessage: String = "JWT is invalid"
 }
 
-object HeaderMissing extends Exception() {
+object HeaderMissing extends Exception {
   override def getMessage: String = "Authentication header was not present"
 }
 
