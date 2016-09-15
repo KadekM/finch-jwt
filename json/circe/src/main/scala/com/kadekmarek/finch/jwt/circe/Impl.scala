@@ -20,24 +20,39 @@ object HeaderMissing extends Exception() {
 }
 
 // TODO: support multiple algorithms
-final case class JwtAuth(key: String, algorithm: JwtHmacAlgorithm, authHeader: String) {
 
-  def auth: Endpoint[JwtClaim] =
-    headerOption(authHeader)
-      .map(_.map(JwtCirce.decode(_, key, Seq(algorithm))))
-      .mapOutput {
-        case Some(result) =>
-          result match {
-            case Success(x) => Ok(x)
-            case Failure(_) => Unauthorized(JwtAuthFailed)
-          }
-        case None => Unauthorized(HeaderMissing)
-      }
+sealed trait JwtAuth {
+  val key: String
+  val algorithm: JwtHmacAlgorithm
 
-  def authAs[A: Decoder]: Endpoint[A] = auth.mapOutput { claim =>
-    decode[A](claim.content) match {
-      case Xor.Right(x) => Ok(x)
-      case Xor.Left(e)  => BadRequest(e)
+  protected def by(e: Endpoint[Option[String]]): Endpoint[JwtClaim] =
+    e.map(_.map(JwtCirce.decode(_, key, Seq(algorithm)))).mapOutput {
+      case Some(result) =>
+        result match {
+          case Success(x) => Ok(x)
+          case Failure(_) => Unauthorized(JwtAuthFailed)
+        }
+      case None => Unauthorized(HeaderMissing)
     }
-  }
+
+  protected def byAs[A: Decoder](e: Endpoint[Option[String]]): Endpoint[A] =
+    by(e).mapOutput { claim =>
+      decode[A](claim.content) match {
+        case Xor.Right(x) => Ok(x)
+        case Xor.Left(er) => BadRequest(er)
+      }
+    }
+}
+
+final case class HeaderJwtAuth(key: String,
+                               algorithm: JwtHmacAlgorithm,
+                               headerName: String)
+    extends JwtAuth {
+  def auth: Endpoint[JwtClaim] = by(headerOption(headerName))
+  def authAs[A: Decoder]       = byAs(headerOption(headerName))
+}
+
+final case class UrlJwtAuth(key: String, algorithm: JwtHmacAlgorithm) extends JwtAuth {
+  def auth: Endpoint[JwtClaim] = by(string.map(Option.apply))
+  def authAs[A: Decoder]       = byAs(string.map(Option.apply))
 }
