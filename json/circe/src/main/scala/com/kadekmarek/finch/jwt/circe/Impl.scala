@@ -1,11 +1,9 @@
 package com.kadekmarek.finch.jwt.circe
 
 import cats.data.Xor
-import com.twitter.util.Future
-import io.catbird.util.Rerunnable
-import io.circe.{Decoder, Json}
-import io.finch.{Endpoint, Input, Output, _}
-import pdi.jwt.{JwtCirce, JwtClaim}
+import io.circe._
+import io.finch._
+import pdi.jwt._
 import pdi.jwt.algorithms.JwtHmacAlgorithm
 import io.circe.parser._
 
