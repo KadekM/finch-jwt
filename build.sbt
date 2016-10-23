@@ -5,7 +5,7 @@ val finchVersion = "0.11.0-M4"
 
 val baseSettings = Seq(
   scalaVersion := "2.11.8",
-  organization := "com.kadekm",
+  organization := "com.marekkadek",
   resolvers := Seq(
     Resolver.sonatypeRepo("releases"),
     Resolver.sonatypeRepo("snapshots"),
@@ -41,6 +41,7 @@ val publishSettings = Seq(
   licenses += ("MIT license", url("http://www.opensource.org/licenses/mit-license.php")),
   publishMavenStyle := true,
   publishArtifact in Test := false,
+  releasePublishArtifactsAction := PgpKeys.publishSigned.value,
   publishTo := {
     val nexus = "https://oss.sonatype.org/"
     if (isSnapshot.value)

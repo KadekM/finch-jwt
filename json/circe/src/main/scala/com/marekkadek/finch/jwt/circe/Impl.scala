@@ -1,4 +1,4 @@
-package com.kadekm.finch.jwt.circe
+package com.marekkadek.finch.jwt.circe
 
 import cats.data.Xor
 import io.circe._
