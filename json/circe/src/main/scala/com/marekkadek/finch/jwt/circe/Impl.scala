@@ -54,3 +54,8 @@ final case class UrlJwtAuth(key: String, algorithm: JwtHmacAlgorithm) extends Jw
   def auth: Endpoint[JwtClaim] = by(string.map(Option.apply))
   def authAs[A: Decoder]       = byAs(string.map(Option.apply))
 }
+
+final case class CookieJwtAuth(key: String, algorithm: JwtHmacAlgorithm, cookieName: String) extends JwtAuth {
+  def auth: Endpoint[JwtClaim] = by(cookieOption(cookieName).map(_.map(_.value)))
+  def authAs[A: Decoder] = byAs(cookieOption(cookieName).map(_.map(_.value)))
+}
