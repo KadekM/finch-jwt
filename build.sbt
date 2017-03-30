@@ -5,6 +5,8 @@ val finchVersion = "0.13.1"
 
 val baseSettings = Seq(
   scalaVersion := "2.12.1",
+  crossScalaVersions := Seq("2.12.1", "2.11.8"),
+  releaseCrossBuild := true,
   organization := "com.marekkadek",
   resolvers := Seq(
     Resolver.sonatypeRepo("releases"),
