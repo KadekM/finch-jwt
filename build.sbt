@@ -1,10 +1,10 @@
 scalafmtConfig in ThisBuild := Some(file(".scalafmt"))
 
-val jwtVersion   = "0.9.0"
-val finchVersion = "0.11.0-M4"
+val jwtVersion   = "0.12.0"
+val finchVersion = "0.13.1"
 
 val baseSettings = Seq(
-  scalaVersion := "2.11.8",
+  scalaVersion := "2.12.1",
   organization := "com.marekkadek",
   resolvers := Seq(
     Resolver.sonatypeRepo("releases"),

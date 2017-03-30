@@ -1,6 +1,5 @@
 package com.marekkadek.finch.jwt.circe
 
-import cats.data.Xor
 import io.circe._
 import io.finch._
 import pdi.jwt._
@@ -36,8 +35,8 @@ sealed trait JwtAuth {
   protected def byAs[A: Decoder](e: Endpoint[Option[String]]): Endpoint[A] =
     by(e).mapOutput { claim =>
       decode[A](claim.content) match {
-        case Xor.Right(x) => Ok(x)
-        case Xor.Left(er) => BadRequest(er)
+        case Right(x) => Ok(x)
+        case Left(er) => BadRequest(er)
       }
     }
 }
